@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <assignments>
+        <name>SetAccountEmail</name>
+        <label>SetAccountEmail</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>AccountEmail</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Record.Account_Contact_Email__c</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Accounts_Contact</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>SetEmail</name>
+        <label>SetEmail</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>GeneralEmail</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>$Record.General_Contact_Email__c</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>General_Contact</targetReference>
+        </connector>
+    </assignments>
+    <decisions>
+        <name>Has_Accounts_Contact_Information</name>
+        <label>Has Accounts Contact Information</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Has_Sales_Contact_Information</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Contains_Account_Contact_Info</name>
+            <conditionLogic>(1 AND 2) OR (1 AND 3)</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Account_Contact_Name__c</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>GeneralEmail</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <elementReference>$Record.Account_Contact_Email__c</elementReference>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>GeneralEmail</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>SetAccountEmail</targetReference>
+            </connector>
+            <label>Contains Account Contact Info</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Has_General_Contact_Information</name>
+        <label>Has General Contact Information</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnector>
+            <targetReference>Has_Accounts_Contact_Information</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Contains_General_Contact_Info</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.General_Contact_Name__c</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>$Record.General_Contact_Name__c</leftValueReference>
+                <operator>IsChanged</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>SetEmail</targetReference>
+            </connector>
+            <label>Contains General Contact Info</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <name>Has_Sales_Contact_Information</name>
+        <label>Has Sales Contact Information</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Contains_Sales_Contact_Info</name>
+            <conditionLogic>(1 AND 2 AND 3) OR (1 AND (4 OR 5))</conditionLogic>
+            <conditions>
+                <leftValueReference>$Record.Sales_Contact_Name__c</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>GeneralEmail</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <elementReference>$Record.Sales_Contact_Email__c</elementReference>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>AccountEmail</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <elementReference>$Record.Sales_Contact_Email__c</elementReference>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>GeneralEmail</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>AccountEmail</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Sales_Contact</targetReference>
+            </connector>
+            <label>Contains Sales Contact Info</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <formulas>
+        <name>Accounts_FirstName</name>
+        <dataType>String</dataType>
+        <expression>IF(CONTAINS({!$Record.Account_Contact_Name__c}, &quot; &quot;),
+LEFT({!$Record.Account_Contact_Name__c},
+FIND(&quot; &quot;, {!$Record.Account_Contact_Name__c}) - 1), {!$Record.Account_Contact_Name__c})</expression>
+    </formulas>
+    <formulas>
+        <name>Accounts_LastName</name>
+        <dataType>String</dataType>
+        <expression>IF(
+FIND(&apos; &apos;, TRIM({!$Record.Account_Contact_Name__c})) != 0,
+RIGHT(
+TRIM({!$Record.Account_Contact_Name__c}),
+FIND(&apos; &apos;, REVERSE(TRIM({!$Record.Account_Contact_Name__c}))) - 1
+),
+TRIM({!$Record.Account_Contact_Name__c})
+)</expression>
+    </formulas>
+    <formulas>
+        <name>GeneralContact_FirstName</name>
+        <dataType>String</dataType>
+        <expression>IF(CONTAINS({!$Record.General_Contact_Name__c}, &quot; &quot;),
+LEFT({!$Record.General_Contact_Name__c},
+FIND(&quot; &quot;, {!$Record.General_Contact_Name__c}) - 1), {!$Record.General_Contact_Name__c})</expression>
+    </formulas>
+    <formulas>
+        <name>GeneralContact_LastName</name>
+        <dataType>String</dataType>
+        <expression>IF(
+FIND(&apos; &apos;, TRIM({!$Record.General_Contact_Name__c})) != 0,
+RIGHT(
+TRIM({!$Record.General_Contact_Name__c}),
+FIND(&apos; &apos;, REVERSE(TRIM({!$Record.General_Contact_Name__c}))) - 1
+),
+TRIM({!$Record.General_Contact_Name__c})
+)</expression>
+    </formulas>
+    <formulas>
+        <name>SalesContact_FirstName</name>
+        <dataType>String</dataType>
+        <expression>IF(CONTAINS({!$Record.Sales_Contact_Name__c}, &quot; &quot;),
+LEFT({!$Record.Sales_Contact_Name__c},
+FIND(&quot; &quot;, {!$Record.Sales_Contact_Name__c}) - 1), {!$Record.Sales_Contact_Name__c})</expression>
+    </formulas>
+    <formulas>
+        <name>SalesContact_LastName</name>
+        <dataType>String</dataType>
+        <expression>IF(
+FIND(&apos; &apos;, TRIM({!$Record.Sales_Contact_Name__c})) != 0,
+RIGHT(
+TRIM({!$Record.Sales_Contact_Name__c}),
+FIND(&apos; &apos;, REVERSE(TRIM({!$Record.Sales_Contact_Name__c}))) - 1
+),
+TRIM({!$Record.Sales_Contact_Name__c})
+)</expression>
+    </formulas>
+    <interviewLabel>Update Related Contacts {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Update Related Contacts</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordCreates>
+        <name>Accounts_Contact</name>
+        <label>Accounts Contact</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Has_Sales_Contact_Information</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>AccountId</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Type__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Accounts Contact</stringValue>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>AccountId</field>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Email</field>
+            <value>
+                <elementReference>$Record.Account_Contact_Email__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>FirstName</field>
+            <value>
+                <elementReference>Accounts_FirstName</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>LastName</field>
+            <value>
+                <elementReference>Accounts_LastName</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>MobilePhone</field>
+            <value>
+                <elementReference>$Record.Account_Contact_Mobile__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Phone</field>
+            <value>
+                <elementReference>$Record.Account_Contact_Phone__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Type__c</field>
+            <value>
+                <stringValue>Accounts Contact</stringValue>
+            </value>
+        </inputAssignments>
+        <object>Contact</object>
+        <operationMultMatchingRecords>UpdateLatestRecord</operationMultMatchingRecords>
+        <operationOneMatchingRecord>UpdateAllRecords</operationOneMatchingRecord>
+        <operationZeroMatchingRecords>AddRecord</operationZeroMatchingRecords>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <recordCreates>
+        <name>General_Contact</name>
+        <label>General Contact</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Has_Accounts_Contact_Information</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>AccountId</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Type__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>General Contact</stringValue>
+            </value>
+        </filters>
+        <filters>
+            <field>LastName</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>GeneralContact_LastName</elementReference>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>AccountId</field>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Email</field>
+            <value>
+                <elementReference>$Record.General_Contact_Email__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>FirstName</field>
+            <value>
+                <elementReference>GeneralContact_FirstName</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>LastName</field>
+            <value>
+                <elementReference>GeneralContact_LastName</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>MobilePhone</field>
+            <value>
+                <elementReference>$Record.General_Contact_Mobile__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Phone</field>
+            <value>
+                <elementReference>$Record.General_Contact_Phone__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Type__c</field>
+            <value>
+                <stringValue>General Contact</stringValue>
+            </value>
+        </inputAssignments>
+        <object>Contact</object>
+        <operationMultMatchingRecords>UpdateLatestRecord</operationMultMatchingRecords>
+        <operationOneMatchingRecord>UpdateAllRecords</operationOneMatchingRecord>
+        <operationZeroMatchingRecords>AddRecord</operationZeroMatchingRecords>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <recordCreates>
+        <name>Sales_Contact</name>
+        <label>Sales Contact</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>AccountId</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Type__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Sales Contact</stringValue>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>AccountId</field>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Email</field>
+            <value>
+                <elementReference>$Record.Sales_Contact_Email__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>FirstName</field>
+            <value>
+                <elementReference>SalesContact_FirstName</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>LastName</field>
+            <value>
+                <elementReference>SalesContact_LastName</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>MobilePhone</field>
+            <value>
+                <elementReference>$Record.Sales_Contact_Mobile__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Phone</field>
+            <value>
+                <elementReference>$Record.Sales_Contact_Phone__c</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Type__c</field>
+            <value>
+                <stringValue>Sales Contact</stringValue>
+            </value>
+        </inputAssignments>
+        <object>Contact</object>
+        <operationMultMatchingRecords>UpdateLatestRecord</operationMultMatchingRecords>
+        <operationOneMatchingRecord>UpdateAllRecords</operationOneMatchingRecord>
+        <operationZeroMatchingRecords>AddRecord</operationZeroMatchingRecords>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Has_General_Contact_Information</targetReference>
+        </connector>
+        <object>Account</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Draft</status>
+    <variables>
+        <name>AccountEmail</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+    <variables>
+        <name>GeneralEmail</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+</Flow>

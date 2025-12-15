@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>64.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <environments>Default</environments>
+    <formulas>
+        <name>FirstNameTruncated</name>
+        <dataType>String</dataType>
+        <expression>IF(CONTAINS({!$Record.FirstName}, &quot; &quot;),
+LEFT({!$Record.FirstName},
+FIND(&quot; &quot;, {!$Record.FirstName}) - 1), {!$Record.FirstName})</expression>
+    </formulas>
+    <formulas>
+        <name>LastNameTruncated</name>
+        <dataType>String</dataType>
+        <expression>IF(
+FIND(&apos; &apos;, TRIM({!$Record.LastName})) != 0,
+RIGHT(
+TRIM({!$Record.LastName}),
+FIND(&apos; &apos;, REVERSE(TRIM({!$Record.LastName}))) - 1
+),
+TRIM({!$Record.LastName})
+)</expression>
+    </formulas>
+    <interviewLabel>Scheduled - Fix Contact Names from Tencia {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Scheduled - Fix Contact Names from Tencia</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordUpdates>
+        <name>Update_First_and_Last_Name</name>
+        <label>Update First and Last Name</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <inputAssignments>
+            <field>FirstName</field>
+            <value>
+                <elementReference>FirstNameTruncated</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>LastName</field>
+            <value>
+                <elementReference>LastNameTruncated</elementReference>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Update_First_and_Last_Name</targetReference>
+        </connector>
+        <object>Contact</object>
+        <schedule>
+            <frequency>Once</frequency>
+            <startDate>2025-10-14</startDate>
+            <startTime>09:45:00.000Z</startTime>
+        </schedule>
+        <triggerType>Scheduled</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

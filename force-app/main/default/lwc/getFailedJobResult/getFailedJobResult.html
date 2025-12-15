@@ -1,0 +1,19 @@
+<template>
+    <lightning-card title="Open Job Result URL">
+        <div class="slds-p-around_medium">
+            <lightning-input 
+                label="Enter Job Id"
+                value={jobId}
+                onchange={handleInputChange}
+                placeholder="e.g. 750QE000009jN1n">
+            </lightning-input>
+
+            <lightning-button 
+                class="slds-m-top_medium"
+                label="Open Job Result"
+                variant="brand"
+                onclick={openJobResult}>
+            </lightning-button>
+        </div>
+    </lightning-card>
+</template>
